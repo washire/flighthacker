@@ -1,0 +1,9 @@
+uk_airport,alt_hub,transport_type,approx_duration_minutes,approx_cost_gbp_pence,notes
+LHR,CDG,eurostar,150,8000,Eurostar London St Pancras to Paris Gare du Nord then CDG
+LHR,BRU,eurostar,130,7000,Eurostar to Brussels Midi then BRU
+LHR,AMS,train+ferry,240,9000,Train + ferry or direct train
+LGW,CDG,eurostar,150,8000,Train to St Pancras then Eurostar
+LGW,BRU,eurostar,130,7000,
+STN,AMS,flixbus,180,2500,FlixBus London to Amsterdam
+MAN,AMS,train+ferry,300,9500,Long route — only worthwhile for very long haul
+EDI,AMS,train+ferry,480,12000,Impractical for most travellers

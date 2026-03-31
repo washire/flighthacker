@@ -1,0 +1,22 @@
+airline_code,airline_name,cabin,surcharge_gbp_pence,notes
+BA,British Airways,economy,9000,YQ fuel surcharge on award tickets
+BA,British Airways,business,21000,YQ fuel surcharge on award tickets
+BA,British Airways,first,30000,YQ fuel surcharge on award tickets
+IB,Iberia,economy,5000,YQ on Avios redemptions
+IB,Iberia,business,12000,YQ on Avios redemptions
+AA,American Airlines,economy,0,No fuel surcharge on AA metal
+AA,American Airlines,business,0,No fuel surcharge on AA metal
+QF,Qantas,economy,8000,YQ on partner award tickets
+QF,Qantas,business,18000,YQ on partner award tickets
+CX,Cathay Pacific,economy,3000,YQ on award tickets
+CX,Cathay Pacific,business,8000,YQ on award tickets
+EK,Emirates,economy,0,No YQ on most routes
+EK,Emirates,business,0,No YQ on most routes
+QR,Qatar Airways,economy,0,No YQ policy
+QR,Qatar Airways,business,0,No YQ policy
+SQ,Singapore Airlines,economy,2000,Moderate YQ
+SQ,Singapore Airlines,business,5000,Moderate YQ
+AY,Finnair,economy,0,No fuel surcharge
+AY,Finnair,business,0,No fuel surcharge
+JL,Japan Airlines,economy,0,Minimal fees
+JL,Japan Airlines,business,0,Minimal fees

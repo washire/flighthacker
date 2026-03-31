@@ -1,0 +1,40 @@
+airport_iata,name,city,transport_type,destination_label,duration_minutes,cost_gbp_pence
+LHR,London Heathrow,London,tube,Central London,50,650
+LGW,London Gatwick,London,train,Central London,30,1200
+STN,London Stansted,London,train,Central London,45,2200
+LTN,London Luton,London,bus+train,Central London,60,1600
+SEN,London Southend,London,train,Central London,55,2000
+MAN,Manchester Airport,Manchester,tram,Manchester City Centre,25,380
+BHX,Birmingham Airport,Birmingham,train,Birmingham New Street,10,320
+EDI,Edinburgh Airport,Edinburgh,tram,Edinburgh City Centre,30,800
+GLA,Glasgow Airport,Glasgow,bus,Glasgow City Centre,25,550
+BRS,Bristol Airport,Bristol,bus,Bristol City Centre,30,1000
+CDG,Paris CDG,Paris,train,Paris Gare du Nord,30,1200
+ORY,Paris Orly,Paris,train,Paris Antony,25,800
+AMS,Amsterdam Schiphol,Amsterdam,train,Amsterdam Centraal,15,450
+FRA,Frankfurt Airport,Frankfurt,train,Frankfurt Hbf,10,380
+MUC,Munich Airport,Munich,train,Munich Hbf,40,1100
+BCN,Barcelona El Prat,Barcelona,metro,Barcelona Centre,35,550
+MAD,Madrid Barajas,Madrid,metro,Madrid Nuevos Ministerios,15,300
+FCO,Rome Fiumicino,Rome,train,Roma Termini,35,1500
+ZRH,Zurich Airport,Zurich,train,Zurich Hbf,10,380
+VIE,Vienna Airport,Vienna,train,Wien Hbf,16,420
+CPH,Copenhagen Airport,Copenhagen,metro,Copenhagen Central,12,350
+BRU,Brussels Airport,Brussels,train,Brussels Midi,17,1000
+DXB,Dubai International,Dubai,metro,Dubai Union,50,200
+AUH,Abu Dhabi Airport,Abu Dhabi,taxi,Abu Dhabi City,35,3500
+DOH,Doha Hamad,Doha,taxi,Doha City,20,3000
+SIN,Singapore Changi,Singapore,metro,Raffles Place,30,200
+BKK,Bangkok Suvarnabhumi,Bangkok,train,Phaya Thai,30,400
+KUL,KL International,Kuala Lumpur,train,KL Sentral,28,600
+NRT,Tokyo Narita,Tokyo,train,Tokyo Station,60,3000
+HND,Tokyo Haneda,Tokyo,monorail,Hamamatsucho,25,600
+ICN,Seoul Incheon,Seoul,train,Seoul Station,43,900
+HKG,Hong Kong International,Hong Kong,train,Kowloon,24,1200
+SYD,Sydney Airport,Sydney,train,Central Station,13,1900
+JFK,New York JFK,New York,train,Midtown Manhattan,45,900
+LAX,Los Angeles International,Los Angeles,taxi,Downtown LA,30,4500
+ORD,Chicago O'Hare,Chicago,metro,Chicago Loop,45,500
+ATL,Atlanta Airport,Atlanta,metro,Downtown Atlanta,15,300
+GRU,Sao Paulo Guarulhos,Sao Paulo,bus,Tiete Bus Terminal,55,500
+IST,Istanbul Airport,Istanbul,metro,Istanbul Centre,38,700

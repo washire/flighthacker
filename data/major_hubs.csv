@@ -1,0 +1,31 @@
+iata,name,city,country,traffic_rank,alliance
+LHR,London Heathrow,London,GB,1,oneworld
+DXB,Dubai International,Dubai,AE,2,none
+ATL,Hartsfield-Jackson Atlanta,Atlanta,US,3,skyteam
+ORD,Chicago O'Hare,Chicago,US,4,star
+LAX,Los Angeles International,Los Angeles,US,5,oneworld
+PEK,Beijing Capital,Beijing,CN,6,star
+HND,Tokyo Haneda,Tokyo,JP,7,star
+CDG,Paris Charles de Gaulle,Paris,FR,8,skyteam
+AMS,Amsterdam Schiphol,Amsterdam,NL,9,skyteam
+FRA,Frankfurt International,Frankfurt,DE,10,star
+MAD,Madrid Barajas,Madrid,ES,11,oneworld
+SIN,Singapore Changi,Singapore,SG,12,star
+BKK,Bangkok Suvarnabhumi,Bangkok,TH,13,star
+ICN,Seoul Incheon,Seoul,KR,14,skyteam
+JFK,New York JFK,New York,US,15,none
+GRU,Sao Paulo Guarulhos,Sao Paulo,BR,16,star
+MEX,Mexico City Juarez,Mexico City,MX,17,skyteam
+SYD,Sydney Kingsford Smith,Sydney,AU,18,oneworld
+CPH,Copenhagen Kastrup,Copenhagen,DK,19,star
+ZRH,Zurich Airport,Zurich,CH,20,star
+VIE,Vienna International,Vienna,AT,21,star
+IST,Istanbul Airport,Istanbul,TR,22,star
+MUC,Munich International,Munich,DE,23,star
+BCN,Barcelona El Prat,Barcelona,ES,24,oneworld
+NRT,Tokyo Narita,Tokyo,JP,25,none
+DOH,Doha Hamad,Doha,QA,26,oneworld
+AUH,Abu Dhabi International,Abu Dhabi,AE,27,none
+EWR,Newark Liberty,New York,US,28,star
+ORY,Paris Orly,Paris,FR,29,skyteam
+FCO,Rome Fiumicino,Rome,IT,30,star
