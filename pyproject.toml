@@ -1,0 +1,118 @@
+# pyproject.toml
+# -------------
+# Project manifest and dependency declaration for the FlightHacker backend.
+# Managed by `uv` — the fast Python package manager that generates a
+# uv.lock file with SHA-256 hashes for every package and sub-dependency.
+#
+# SECURITY: Never run `uv sync` without the lock file in production.
+# Always use `uv sync --frozen` in CI and on Railway to enforce hash verification.
+# This prevents supply chain attacks where a package is silently swapped.
+#
+# To add a dependency:  uv add <package>
+# To install (dev):     uv sync
+# To install (prod):    uv sync --frozen --no-dev
+
+[project]
+name = "flighthacker-backend"
+version = "0.1.0"
+description = "FlightHacker backend API — finds the cheapest way between any two points using 20 hacking methods"
+requires-python = ">=3.12"
+
+dependencies = [
+    # --- Web framework ---
+    # FastAPI: modern async Python web framework. Chosen because fli (our
+    # flight data library) is Python-native, and FastAPI's async support
+    # lets us fire many parallel flight queries without blocking.
+    "fastapi==0.115.6",
+
+    # ASGI server — runs the FastAPI app in production and development.
+    # [standard] includes uvloop (faster event loop) and httptools (faster HTTP).
+    "uvicorn[standard]==0.34.0",
+
+    # --- Database ---
+    # SQLAlchemy async ORM. Stores users, searches, price history, alerts.
+    # asyncio mode required because FastAPI is async throughout.
+    "sqlalchemy[asyncio]==2.0.36",
+
+    # Async PostgreSQL driver — required by SQLAlchemy's asyncio mode.
+    "asyncpg==0.30.0",
+
+    # Database migration tool — manages schema changes safely.
+    # Run `alembic upgrade head` to apply migrations.
+    "alembic==1.14.0",
+
+    # --- Config & validation ---
+    # Pydantic v2: data validation throughout the app.
+    # All API request/response models, service layer models use Pydantic.
+    "pydantic==2.10.4",
+
+    # Pydantic extension that reads settings from environment variables and
+    # .env files. Used in config.py for all app configuration.
+    "pydantic-settings==2.7.0",
+
+    # --- HTTP client ---
+    # httpx: async HTTP client. Used by fli internally and by our services
+    # (currency conversion, ntfy notifications, award scrapers).
+    # IMPORTANT: We use httpx everywhere — never requests, never aiohttp.
+    "httpx==0.28.1",
+
+    # --- Caching & background jobs ---
+    # Redis client — caching flight query results, ground transport lookups,
+    # currency rates. Cache is the primary cost and performance control.
+    "redis==5.2.1",
+
+    # Celery: background task queue for price alert monitoring and error
+    # fare polling. Uses Redis as the broker.
+    "celery==5.4.0",
+
+    # --- Flight data ---
+    # fli: reverse-engineered Google Flights library. Free, no API key.
+    # Makes a single HTTP GET to google.com/travel/flights only.
+    # Safety verified: no third-party data transmission.
+    # Package name on PyPI is "flights" — import as `from fli...`
+    "flights==0.3.0",
+
+    # --- Utilities ---
+    # python-dotenv: loads .env file into environment on startup (dev only).
+    "python-dotenv==1.0.1",
+
+    # CSV parsing for static data files (airport transfers, award charts etc.)
+    # csv is in stdlib but we use this for robust encoding handling.
+    "chardet==5.2.0",
+
+    # Required by Pydantic's EmailStr type in user models.
+    "email-validator==2.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest==8.3.4",
+    "pytest-asyncio==0.25.2",
+    "httpx==0.28.1",  # Also used for TestClient in tests
+
+    # Code quality — enforces the 300-line file limit and style rules
+    "ruff==0.9.1",
+]
+
+[tool.uv]
+# Tells uv to generate and enforce hashes in uv.lock.
+# Every package installed is verified against its SHA-256 hash.
+# If a package hash doesn't match, installation fails loudly.
+dev-dependencies = [
+    "pytest==8.3.4",
+    "pytest-asyncio==0.25.2",
+    "ruff==0.9.1",
+]
+
+[tool.ruff]
+# Maximum line length — mirrors our 300-line file limit philosophy.
+line-length = 100
+
+# Flag files that exceed 300 lines — our hard limit per file.
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
