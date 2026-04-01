@@ -174,6 +174,11 @@ class SearchRequest(BaseModel):
     # Feature overrides (None = use server feature flag)
     include_awards: bool | None = None
     crazy_mode: bool = False
+    # City-mode: search all airports in a city simultaneously
+    origin_airports: list[str] | None = None       # e.g. ["LHR","LGW","STN","LTN","LCY"]
+    destination_airports: list[str] | None = None
+    origin_city: str | None = None                  # e.g. "London"
+    destination_city: str | None = None
 
     @field_validator("origin", "destination", mode="before")
     @classmethod
@@ -186,6 +191,16 @@ class SearchRequest(BaseModel):
         if v and info.data.get("outbound_date") and v < info.data["outbound_date"]:
             raise ValueError("return_date must be on or after outbound_date")
         return v
+
+    @property
+    def all_origins(self) -> list[str]:
+        """All origin airports to search (city-mode or single)."""
+        return self.origin_airports or [self.origin]
+
+    @property
+    def all_destinations(self) -> list[str]:
+        """All destination airports to search (city-mode or single)."""
+        return self.destination_airports or [self.destination]
 
 
 class SearchPhase(str, Enum):

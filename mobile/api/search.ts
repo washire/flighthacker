@@ -13,6 +13,11 @@ export interface SearchRequest {
   avios_balance?: number | null;
   pence_per_point?: number | null;
   crazy_mode?: boolean;
+  // City-mode: search all airport combinations
+  origin_airports?: string[] | null;
+  destination_airports?: string[] | null;
+  origin_city?: string | null;
+  destination_city?: string | null;
 }
 
 export interface FlightLeg {

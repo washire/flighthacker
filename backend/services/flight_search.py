@@ -132,13 +132,15 @@ class FlightSearchClient:
                 results.append(RawFlightResult(
                     origin=origin,
                     destination=destination,
-                    departure_at=_parse_dt(leg.departure if leg else None),
-                    arrival_at=_parse_dt(leg.arrival if leg else None),
+                    # fli FlightLeg uses departure_datetime / arrival_datetime
+                    departure_at=_parse_dt(leg.departure_datetime if leg else None),
+                    arrival_at=_parse_dt(leg.arrival_datetime if leg else None),
                     airline_code=_airline_code(flight),
                     airline_name=_airline_name(flight),
                     flight_number=_flight_number(leg),
+                    # fli FlightResult.duration is total trip duration in minutes
                     duration_minutes=int(getattr(flight, "duration", 0) or 0),
-                    stops=max(0, len(flight.legs) - 1),
+                    stops=int(getattr(flight, "stops", 0) or 0),
                     price_usd=float(flight.price),
                     price_gbp_pence=price_gbp,
                     cabin=cabin,
@@ -166,29 +168,38 @@ def _fli_search_sync(
     return_date: date | None,
 ) -> list:
     """
-    Thin wrapper around fli's sync API.
-    fli docs: https://github.com/The-Compiler/fli
+    Wrapper around fli's sync API (pip install flights installs as fli module).
+
+    fli uses Airport and SeatType enums — airport codes must be valid IATA codes
+    present in the fli Airport enum. Unknown codes raise ValueError.
     """
-    from flights import GoogleFlights, FlightData, TFSData  # type: ignore
+    from fli.search import SearchFlights, SearchFlightsFilters  # type: ignore
+    from fli.models import Airport, SeatType, PassengerInfo  # type: ignore
 
-    # Map our cabin string to fli's seat class
     _CABIN_MAP = {
-        "economy": "ECONOMY",
-        "premium_economy": "PREMIUM_ECONOMY",
-        "business": "BUSINESS",
-        "first": "FIRST",
+        "economy": SeatType.ECONOMY,
+        "premium_economy": SeatType.PREMIUM_ECONOMY,
+        "business": SeatType.BUSINESS,
+        "first": SeatType.FIRST,
     }
-    seat = _CABIN_MAP.get(cabin, "ECONOMY")
+    seat_type = _CABIN_MAP.get(cabin, SeatType.ECONOMY)
 
-    tfs = TFSData.from_airport(
-        origin, destination,
-        date=travel_date.strftime("%Y-%m-%d"),
-        seat=seat,
-        passengers=passengers,
+    try:
+        dep_airport = Airport[origin.upper()]
+        arr_airport = Airport[destination.upper()]
+    except KeyError as exc:
+        raise ValueError(f"Airport code not in fli enum: {exc}") from exc
+
+    filters = SearchFlightsFilters(
+        departure_airport=dep_airport,
+        arrival_airport=arr_airport,
+        departure_date=travel_date.strftime("%Y-%m-%d"),
+        passenger_info=PassengerInfo(adults=passengers),
+        seat_type=seat_type,
     )
-    gf = GoogleFlights(tfs)
-    gf.fetch()
-    return gf.flights
+    searcher = SearchFlights()
+    results = searcher.search(filters)
+    return results or []
 
 
 # ---------------------------------------------------------------------------
@@ -208,21 +219,23 @@ def _parse_dt(value: Any) -> datetime:
 
 
 def _airline_code(flight: Any) -> str:
+    # fli: leg.airline is an Airline enum; .name is the IATA code e.g. "BA"
     try:
-        return flight.legs[0].airline_code or "??"
+        return flight.legs[0].airline.name or "??"
     except Exception:
         return "??"
 
 
 def _airline_name(flight: Any) -> str:
+    # fli: leg.airline.value is the full name e.g. "British Airways"
     try:
-        return flight.legs[0].airline or "Unknown Airline"
+        return flight.legs[0].airline.value or "Unknown Airline"
     except Exception:
         return "Unknown Airline"
 
 
 def _flight_number(leg: Any) -> str:
     try:
-        return f"{leg.airline_code}{leg.flight_number}"
+        return f"{leg.airline.name}{leg.flight_number}"
     except Exception:
         return "??0"

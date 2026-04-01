@@ -1,20 +1,28 @@
 /**
- * Profile tab — Avios balance, pence-per-point, ntfy topic.
+ * Profile tab — Avios balance & preferences.
  */
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 import { useState } from "react";
 import { Colors, Spacing, BorderRadius, FontSize } from "../../constants/theme";
 
 export default function ProfileScreen() {
   const [avios, setAvios] = useState("");
   const [ppp, setPpp] = useState("1.0");
-  const [ntfy, setNtfy] = useState("");
+
+  function handleSave() {
+    Alert.alert("Saved", "Your preferences have been saved.");
+  }
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Your Profile</Text>
 
       <View style={styles.card}>
+        <Text style={styles.sectionTitle}>✈️  Avios / Points</Text>
+        <Text style={styles.sectionDesc}>
+          Enter your British Airways Avios balance so FlightHacker can show you reward flight options and calculate whether redeeming points beats buying cash fares.
+        </Text>
+
         <Text style={styles.label}>AVIOS BALANCE</Text>
         <TextInput
           style={styles.input}
@@ -25,7 +33,7 @@ export default function ProfileScreen() {
           keyboardType="numeric"
         />
 
-        <Text style={styles.label}>PENCE PER POINT</Text>
+        <Text style={styles.label}>PENCE PER AVIOS POINT</Text>
         <TextInput
           style={styles.input}
           value={ppp}
@@ -35,24 +43,11 @@ export default function ProfileScreen() {
           keyboardType="decimal-pad"
         />
         <Text style={styles.hint}>
-          Industry standard: 1p. Sweet spot redemptions: 3-4p+
-        </Text>
-
-        <Text style={styles.label}>NTFY TOPIC (for price alerts)</Text>
-        <TextInput
-          style={styles.input}
-          value={ntfy}
-          onChangeText={setNtfy}
-          placeholder="my-flighthacker-alerts"
-          placeholderTextColor={Colors.gray[500]}
-          autoCapitalize="none"
-        />
-        <Text style={styles.hint}>
-          Install ntfy.sh app → subscribe to this topic to get price alerts.
+          How much you value each Avios point. 1p = industry standard. Sweet spot redemptions often achieve 3–4p+. A higher number means you only redeem when it's an exceptional deal.
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>SAVE</Text>
       </TouchableOpacity>
     </ScrollView>
@@ -74,6 +69,18 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
   },
+  sectionTitle: {
+    fontSize: FontSize.md,
+    fontWeight: "700",
+    color: Colors.white,
+    marginBottom: Spacing.xs,
+  },
+  sectionDesc: {
+    fontSize: FontSize.sm,
+    color: Colors.gray[400],
+    lineHeight: 20,
+    marginBottom: Spacing.md,
+  },
   label: {
     fontSize: FontSize.xs,
     fontWeight: "700",
@@ -93,7 +100,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     color: Colors.gray[500],
     marginTop: Spacing.xs,
-    lineHeight: 16,
+    lineHeight: 17,
   },
   button: {
     backgroundColor: Colors.orange[500],

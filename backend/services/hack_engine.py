@@ -78,7 +78,7 @@ class HackEngine:
     # Public API
     # ------------------------------------------------------------------
 
-    async def run_phase_1(self, req: SearchRequest) -> list[ItineraryResult]:
+    async def run_phase_1(self, search_id: str, req: SearchRequest) -> list[ItineraryResult]:
         """Run fast methods. Returns results sorted cheapest first."""
         tasks = [
             self._method_direct(req),
@@ -92,9 +92,9 @@ class HackEngine:
         direct_price = self._cheapest_cash(results)
         self._annotate_savings(results, direct_price)
 
-        # Cache Phase 1 results for polling
+        # Cache Phase 1 results under the real search_id so polling works
         response = SearchResponse(
-            search_id="pending",
+            search_id=search_id,
             request=req,
             results=results,
             phase=SearchPhase.PHASE_1,
@@ -105,7 +105,7 @@ class HackEngine:
             direct_price_gbp=direct_price,
         )
         await self._redis.setex(
-            f"search:phase1:pending",
+            f"search:phase1:{search_id}",
             self._settings.CACHE_TTL_FLIGHT_SEARCH,
             response.model_dump_json(),
         )
@@ -179,19 +179,38 @@ class HackEngine:
     # ------------------------------------------------------------------
 
     async def _method_direct(self, req: SearchRequest) -> list[ItineraryResult]:
-        """Method 1: Plain direct/cheapest cash flight."""
-        raw_list = await self._flight.search(
-            req.origin, req.destination, req.outbound_date,
-            cabin=req.cabin_class.value, passengers=req.passengers,
-        )
+        """Method 1: Plain direct/cheapest cash flight. Supports city-mode (all airport combos)."""
+        origins = req.all_origins
+        dests = req.all_destinations
+        combos = [(o, d) for o in origins for d in dests if o != d]
+
+        searches = await asyncio.gather(*[
+            self._flight.search(
+                o, d, req.outbound_date,
+                cabin=req.cabin_class.value, passengers=req.passengers,
+            )
+            for o, d in combos
+        ], return_exceptions=True)
+
+        all_raw: list = []
+        for item in searches:
+            if isinstance(item, Exception):
+                logger.debug("_method_direct search error: %s", item)
+                continue
+            all_raw.extend(item)
+
+        all_raw.sort(key=lambda r: r.price_gbp_pence)
+
         results = []
-        for raw in raw_list[:3]:
+        for raw in all_raw[:3]:
             leg = self._raw_to_leg(raw, req.cabin_class)
             cost = self._calc.calculate(CostInputs(
                 base_fare_gbp_pence=raw.price_gbp_pence,
                 taxes_gbp_pence=0,
                 carrier_surcharge_pence=0,
             ))
+            origin_label = req.origin_city or raw.origin
+            dest_label = req.destination_city or raw.destination
             results.append(self._make_result(
                 method=HackMethod.DIRECT_CHEAPEST,
                 outbound=[leg],
@@ -199,7 +218,7 @@ class HackEngine:
                 duration=raw.duration_minutes,
                 data_freshness=datetime.now(timezone.utc),
                 deep_link=raw.deep_link,
-                headline=f"Direct cheapest — {req.origin}→{req.destination}",
+                headline=f"Direct cheapest — {origin_label}→{dest_label}",
                 detail="Cheapest direct or one-stop cash fare on this route.",
             ))
         return results

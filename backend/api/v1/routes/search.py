@@ -41,7 +41,11 @@ async def create_search(
     engine = HackEngine(db=db, redis=redis, settings=settings)
 
     # Phase 1 — fast, synchronous
-    phase1_results = await engine.run_phase_1(request)
+    try:
+        phase1_results = await engine.run_phase_1(search_id, request)
+    except Exception as exc:
+        logger.error("search.phase1_error id=%s err=%s", search_id, exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Search failed: {exc}")
 
     # Phase 2 — deep, runs in background
     background_tasks.add_task(engine.run_phase_2, search_id, request)

@@ -1,43 +1,77 @@
 /**
  * Search tab — the main screen.
- * User enters origin/destination/date and hits "Hack It".
  */
 import { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { useSearch } from "../../hooks/useSearch";
 import { useSearchStore } from "../../stores/searchStore";
+import { AirportPicker, type AirportSelection } from "../../components/AirportPicker";
+import { DatePickerModal } from "../../components/DatePickerModal";
 import { Colors, Spacing, BorderRadius, FontSize } from "../../constants/theme";
 
+function todayPlusDays(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().split("T")[0];
+}
+
 export default function SearchScreen() {
-  const [origin, setOrigin] = useState("LHR");
-  const [destination, setDestination] = useState("");
-  const [date, setDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 30);
-    return d.toISOString().split("T")[0];
+  const [origin, setOrigin] = useState<AirportSelection | null>({
+    iata: "LHR",
+    airports: ["LHR", "LGW", "STN", "LTN", "LCY"],
+    city: "London",
+    label: "London — all airports",
   });
+  const [destination, setDestination] = useState<AirportSelection | null>(null);
+  const [outboundDate, setOutboundDate] = useState(todayPlusDays(30));
+  const [returnDate, setReturnDate] = useState("");
+  const [isReturn, setIsReturn] = useState(false);
   const [crazyMode, setCrazyMode] = useState(false);
 
   const { search, isSearching } = useSearch();
   const { reset } = useSearchStore();
 
   function handleSearch() {
-    if (!origin || !destination || !date) return;
+    if (!origin || !destination) {
+      Alert.alert("Missing airports", "Please select both origin and destination.");
+      return;
+    }
+    if (!outboundDate) {
+      Alert.alert("Missing date", "Please select a departure date.");
+      return;
+    }
     reset();
     search(
-      { origin, destination, outbound_date: date, crazy_mode: crazyMode },
+      {
+        origin: origin.iata,
+        destination: destination.iata,
+        outbound_date: outboundDate,
+        return_date: isReturn && returnDate ? returnDate : null,
+        crazy_mode: crazyMode,
+        // City-mode fields
+        origin_airports: origin.airports.length > 1 ? origin.airports : null,
+        destination_airports: destination.airports.length > 1 ? destination.airports : null,
+        origin_city: origin.city,
+        destination_city: destination.city,
+      },
       {
         onSuccess: () => {
           router.push("/(tabs)/results");
+        },
+        onError: (err: any) => {
+          Alert.alert(
+            "Search failed",
+            err?.message ?? "Could not connect to server. Please try again."
+          );
         },
       }
     );
@@ -52,43 +86,50 @@ export default function SearchScreen() {
       <Text style={styles.tagline}>Smart Travel, Hacked Prices.</Text>
 
       <View style={styles.card}>
-        <Text style={styles.label}>FROM</Text>
-        <TextInput
-          style={styles.input}
-          value={origin}
-          onChangeText={(t) => setOrigin(t.toUpperCase())}
-          placeholder="LHR"
-          placeholderTextColor={Colors.gray[500]}
-          maxLength={3}
-          autoCapitalize="characters"
+        <AirportPicker label="FROM" value={origin} onChange={setOrigin} />
+        <AirportPicker label="TO" value={destination} onChange={setDestination} />
+
+        {/* One-way / Return toggle */}
+        <View style={styles.tripTypeRow}>
+          <TouchableOpacity
+            style={[styles.tripBtn, !isReturn && styles.tripBtnActive]}
+            onPress={() => setIsReturn(false)}
+          >
+            <Text style={[styles.tripBtnText, !isReturn && styles.tripBtnTextActive]}>
+              One way
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tripBtn, isReturn && styles.tripBtnActive]}
+            onPress={() => setIsReturn(true)}
+          >
+            <Text style={[styles.tripBtnText, isReturn && styles.tripBtnTextActive]}>
+              Return
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <DatePickerModal
+          label="DEPARTURE"
+          value={outboundDate}
+          onChange={setOutboundDate}
         />
 
-        <Text style={styles.label}>TO</Text>
-        <TextInput
-          style={styles.input}
-          value={destination}
-          onChangeText={(t) => setDestination(t.toUpperCase())}
-          placeholder="NRT"
-          placeholderTextColor={Colors.gray[500]}
-          maxLength={3}
-          autoCapitalize="characters"
-        />
-
-        <Text style={styles.label}>DATE</Text>
-        <TextInput
-          style={styles.input}
-          value={date}
-          onChangeText={setDate}
-          placeholder="2025-08-01"
-          placeholderTextColor={Colors.gray[500]}
-        />
+        {isReturn && (
+          <DatePickerModal
+            label="RETURN"
+            value={returnDate}
+            onChange={setReturnDate}
+            minDate={outboundDate}
+          />
+        )}
 
         <TouchableOpacity
           style={[styles.crazyToggle, crazyMode && styles.crazyActive]}
           onPress={() => setCrazyMode(!crazyMode)}
         >
           <Text style={[styles.crazyText, crazyMode && styles.crazyTextActive]}>
-            {crazyMode ? "CRAZY MODE ON" : "Enable Crazy Mode"}
+            {crazyMode ? "⚡ CRAZY MODE ON — all routes, all methods" : "Enable Crazy Mode"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -99,14 +140,17 @@ export default function SearchScreen() {
         disabled={isSearching}
       >
         {isSearching ? (
-          <ActivityIndicator color={Colors.white} />
+          <View style={styles.loadingRow}>
+            <ActivityIndicator color={Colors.white} />
+            <Text style={[styles.buttonText, { marginLeft: Spacing.sm }]}>Searching…</Text>
+          </View>
         ) : (
           <Text style={styles.buttonText}>HACK IT</Text>
         )}
       </TouchableOpacity>
 
       <Text style={styles.hint}>
-        Searches 20 hacking methods simultaneously.{"\n"}
+        Searches all airport combinations simultaneously.{"\n"}
         Phase 1 results in ~3 seconds.
       </Text>
     </ScrollView>
@@ -129,24 +173,30 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
   },
-  label: {
-    fontSize: FontSize.xs,
-    fontWeight: "700",
-    color: Colors.gray[300],
-    letterSpacing: 1.5,
+  tripTypeRow: {
+    flexDirection: "row",
+    marginTop: Spacing.md,
     marginBottom: Spacing.xs,
-    marginTop: Spacing.sm,
+    gap: Spacing.sm,
   },
-  input: {
-    backgroundColor: Colors.navy[700],
-    color: Colors.white,
-    fontSize: FontSize.lg,
-    fontWeight: "600",
+  tripBtn: {
+    flex: 1,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    marginBottom: Spacing.xs,
-    letterSpacing: 2,
+    borderWidth: 1,
+    borderColor: Colors.navy[600],
+    alignItems: "center",
   },
+  tripBtnActive: {
+    borderColor: Colors.orange[500],
+    backgroundColor: `${Colors.orange[500]}20`,
+  },
+  tripBtnText: {
+    color: Colors.gray[400],
+    fontSize: FontSize.sm,
+    fontWeight: "600",
+  },
+  tripBtnTextActive: { color: Colors.orange[400] },
   crazyToggle: {
     marginTop: Spacing.md,
     borderRadius: BorderRadius.md,
@@ -169,6 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   buttonDisabled: { opacity: 0.6 },
+  loadingRow: { flexDirection: "row", alignItems: "center" },
   buttonText: {
     color: Colors.white,
     fontSize: FontSize.lg,
