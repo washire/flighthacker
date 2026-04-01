@@ -1,0 +1,11 @@
+uk_airport,alt_hub,transport_type,cost_gbp_pence,duration_minutes
+LHR,CDG,Eurostar,8000,165
+LHR,BRU,Eurostar,7000,120
+LHR,AMS,Eurostar,9000,210
+LGW,CDG,Eurostar,8500,180
+STN,CDG,Coach,4000,480
+LCY,CDG,Eurostar,8000,160
+LCY,BRU,Eurostar,7000,110
+MAN,CDG,Train+Eurostar,12000,360
+EDI,CDG,Fly,8000,90
+BHX,CDG,Train+Eurostar,10000,300

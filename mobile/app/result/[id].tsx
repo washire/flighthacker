@@ -5,7 +5,20 @@
 import { View, Text, ScrollView, StyleSheet, Linking, TouchableOpacity } from "react-native";
 import { useSearchStore } from "../../stores/searchStore";
 import { formatGbp, formatGbpRound } from "../../api/search";
+import type { ItineraryResult } from "../../api/search";
 import { Colors, Spacing, BorderRadius, FontSize } from "../../constants/theme";
+
+function buildGoogleFlightsUrl(r: ItineraryResult): string {
+  const leg = r.outbound_legs[0];
+  if (!leg) return "https://www.google.com/flights";
+  const date = leg.departure_at.split("T")[0];
+  const ret = r.return_legs[0];
+  if (ret) {
+    const retDate = ret.departure_at.split("T")[0];
+    return `https://www.google.com/flights#flt=${leg.origin}.${leg.destination}.${date}*${ret.origin}.${ret.destination}.${retDate}`;
+  }
+  return `https://www.google.com/flights#flt=${leg.origin}.${leg.destination}.${date}`;
+}
 
 function LegRow({ leg }: { leg: any }) {
   const dep = new Date(leg.departure_at);
@@ -65,9 +78,9 @@ export default function ResultDetailScreen() {
       {/* Price hero */}
       <View style={styles.hero}>
         <Text style={styles.heroPrice}>{formatGbpRound(c.total_gbp)}</Text>
-        {r.saving.vs_direct_saving_gbp && r.saving.vs_direct_saving_gbp > 0 && (
+        {(r.saving.vs_direct_saving_gbp ?? 0) > 0 && (
           <Text style={styles.heroSaving}>
-            Saves {formatGbpRound(r.saving.vs_direct_saving_gbp)} vs direct
+            Saves {formatGbpRound(r.saving.vs_direct_saving_gbp!)} vs direct
           </Text>
         )}
         <Text style={styles.heroHeadline}>{r.saving.headline}</Text>
@@ -134,15 +147,16 @@ export default function ResultDetailScreen() {
         </View>
       )}
 
-      {/* Book button */}
-      {r.deep_link && (
-        <TouchableOpacity
-          style={styles.bookButton}
-          onPress={() => Linking.openURL(r.deep_link!)}
-        >
-          <Text style={styles.bookButtonText}>BOOK ON GOOGLE FLIGHTS</Text>
-        </TouchableOpacity>
-      )}
+      {/* Book button — deep link if available, otherwise Google Flights search */}
+      <TouchableOpacity
+        style={styles.bookButton}
+        onPress={() => {
+          const url = r.deep_link ?? buildGoogleFlightsUrl(r);
+          Linking.openURL(url);
+        }}
+      >
+        <Text style={styles.bookButtonText}>SEARCH ON GOOGLE FLIGHTS</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

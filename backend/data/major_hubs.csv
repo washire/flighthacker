@@ -1,0 +1,43 @@
+iata,name,rank,alliance
+DXB,Dubai,1,none
+AMS,Amsterdam,2,skyteam
+FRA,Frankfurt,3,star
+LHR,London Heathrow,4,oneworld
+CDG,Paris CDG,5,skyteam
+IST,Istanbul,6,star
+MAD,Madrid,7,oneworld
+SIN,Singapore,8,star
+HKG,Hong Kong,9,oneworld
+ICN,Seoul Incheon,10,skyteam
+DOH,Doha,11,oneworld
+AUH,Abu Dhabi,12,none
+ZRH,Zurich,13,star
+MUC,Munich,14,star
+VIE,Vienna,15,star
+BRU,Brussels,16,star
+ORD,Chicago O'Hare,17,star
+JFK,New York JFK,18,none
+LAX,Los Angeles,19,none
+NRT,Tokyo Narita,20,star
+HND,Tokyo Haneda,21,oneworld
+PEK,Beijing Capital,22,skyteam
+PVG,Shanghai Pudong,23,none
+BKK,Bangkok,24,star
+KUL,Kuala Lumpur,25,oneworld
+SYD,Sydney,26,oneworld
+ADD,Addis Ababa,27,star
+FCO,Rome Fiumicino,28,skyteam
+ATH,Athens,29,star
+CPH,Copenhagen,30,star
+ARN,Stockholm,31,star
+OSL,Oslo,32,star
+HEL,Helsinki,33,oneworld
+LIS,Lisbon,34,star
+YYZ,Toronto,35,star
+GRU,Sao Paulo,36,star
+JNB,Johannesburg,37,star
+NBO,Nairobi,38,skyteam
+CAI,Cairo,39,star
+CMN,Casablanca,40,oneworld
+DEL,Delhi,41,star
+BOM,Mumbai,42,star

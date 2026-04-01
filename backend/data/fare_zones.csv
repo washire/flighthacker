@@ -1,0 +1,80 @@
+iata,zone,zone_name
+LHR,1,UK
+LGW,1,UK
+STN,1,UK
+LTN,1,UK
+LCY,1,UK
+MAN,1,UK
+EDI,1,UK
+BHX,1,UK
+GLA,1,UK
+CDG,2,Europe
+AMS,2,Europe
+FRA,2,Europe
+MUC,2,Europe
+MAD,2,Europe
+BCN,2,Europe
+FCO,2,Europe
+ZRH,2,Europe
+VIE,2,Europe
+BRU,2,Europe
+CPH,2,Europe
+ARN,2,Europe
+OSL,2,Europe
+HEL,2,Europe
+LIS,2,Europe
+ATH,2,Europe
+PRG,2,Europe
+WAW,2,Europe
+BUD,2,Europe
+IST,3,Middle East
+DXB,3,Middle East
+AUH,3,Middle East
+DOH,3,Middle East
+CAI,3,Middle East
+NBO,4,Africa
+JNB,4,Africa
+CMN,4,Africa
+ADD,4,Africa
+LOS,4,Africa
+CPT,4,Africa
+JFK,5,North America
+EWR,5,North America
+LGA,5,North America
+LAX,5,North America
+ORD,5,North America
+MIA,5,North America
+SFO,5,North America
+BOS,5,North America
+ATL,5,North America
+YYZ,5,North America
+YVR,5,North America
+GRU,6,South America
+EZE,6,South America
+BOG,6,South America
+LIM,6,South America
+SCL,6,South America
+MEX,6,South America
+DEL,7,Indian Subcontinent
+BOM,7,Indian Subcontinent
+BLR,7,Indian Subcontinent
+HYD,7,Indian Subcontinent
+MAA,7,Indian Subcontinent
+CCU,7,Indian Subcontinent
+COK,7,Indian Subcontinent
+NRT,8,Far East
+HND,8,Far East
+KIX,8,Far East
+ICN,8,Far East
+PEK,8,Far East
+PVG,8,Far East
+HKG,8,Far East
+SIN,8,Far East
+KUL,8,Far East
+BKK,8,Far East
+CGK,8,Far East
+SYD,9,Australia Pacific
+MEL,9,Australia Pacific
+BNE,9,Australia Pacific
+PER,9,Australia Pacific
+AKL,9,Australia Pacific

@@ -68,14 +68,36 @@ function ResultCard({
           {saving > 0 && (
             <Text style={styles.saving}>Save {formatGbpRound(saving)}</Text>
           )}
-          <Text style={styles.duration}>
-            {Math.floor(item.total_duration_minutes / 60)}h{" "}
-            {item.total_duration_minutes % 60}m
-          </Text>
+          {item.total_duration_minutes > 0 && (
+            <Text style={styles.duration}>
+              {Math.floor(item.total_duration_minutes / 60)}h{" "}
+              {item.total_duration_minutes % 60}m
+            </Text>
+          )}
         </View>
       </View>
 
-      <Text style={styles.headline} numberOfLines={2}>
+      {/* Airline + route summary */}
+      {item.outbound_legs.length > 0 && (() => {
+        const first = item.outbound_legs[0];
+        const last = item.outbound_legs[item.outbound_legs.length - 1];
+        const via = item.outbound_legs.length > 1
+          ? item.outbound_legs.slice(0, -1).map(l => l.destination).join(", ")
+          : null;
+        return (
+          <View style={styles.routeRow}>
+            <Text style={styles.routeText}>
+              {first.origin} → {last.destination}
+              {via ? `  via ${via}` : ""}
+            </Text>
+            <Text style={styles.airlineText}>
+              {first.airline_name} · {first.flight_number}
+            </Text>
+          </View>
+        );
+      })()}
+
+      <Text style={styles.headline} numberOfLines={1}>
         {item.saving.headline}
       </Text>
     </TouchableOpacity>
@@ -228,5 +250,8 @@ const styles = StyleSheet.create({
   cardRight: { alignItems: "flex-end" },
   saving: { fontSize: FontSize.sm, color: Colors.teal[400], fontWeight: "700" },
   duration: { fontSize: FontSize.xs, color: Colors.gray[500] },
-  headline: { fontSize: FontSize.sm, color: Colors.gray[300], lineHeight: 18 },
+  routeRow: { marginBottom: 2 },
+  routeText: { fontSize: FontSize.sm, fontWeight: "600", color: Colors.white },
+  airlineText: { fontSize: FontSize.xs, color: Colors.gray[400], marginTop: 1 },
+  headline: { fontSize: FontSize.xs, color: Colors.gray[500], lineHeight: 16, marginTop: 2 },
 });

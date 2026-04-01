@@ -1,0 +1,32 @@
+airport_iata,city,transport_type,cost_gbp_pence,duration_minutes
+LHR,London,Elizabeth line,1250,45
+LGW,London,Gatwick Express,2000,30
+STN,London,Stansted Express,2500,47
+LTN,London,Coach,1500,70
+LCY,London,Elizabeth line,600,25
+MAN,Manchester,Tram,350,20
+EDI,Edinburgh,Tram,900,35
+BHX,Birmingham,Train,1500,20
+CDG,Paris,RER B,1200,35
+ORY,Paris,Orlyval,1500,30
+AMS,Amsterdam,Train,600,17
+FRA,Frankfurt,S-Bahn,600,15
+MUC,Munich,S-Bahn,1400,40
+MAD,Madrid,Metro,500,40
+BCN,Barcelona,Metro,500,35
+FCO,Rome,Leonardo Express,1500,32
+ZRH,Zurich,Train,700,10
+VIE,Vienna,CAT,1400,16
+BRU,Brussels,Train,1200,20
+DXB,Dubai,Metro,350,30
+AUH,Abu Dhabi,Bus,500,60
+DOH,Doha,Metro,200,25
+JFK,New York,AirTrain+Subway,1000,60
+EWR,Newark,NJ Transit,1500,30
+LAX,Los Angeles,Flyaway Bus,1000,45
+SIN,Singapore,MRT,200,30
+HKG,Hong Kong,Airport Express,1400,24
+NRT,Tokyo,Narita Express,2200,60
+HND,Tokyo,Monorail,600,20
+ICN,Seoul,AREX,500,43
+SYD,Sydney,Train,1800,13

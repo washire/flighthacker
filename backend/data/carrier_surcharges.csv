@@ -1,0 +1,23 @@
+airline_code,airline_name,surcharge_gbp_pence,cabin
+BA,British Airways,25000,economy
+BA,British Airways,55000,business
+BA,British Airways,55000,first
+VS,Virgin Atlantic,20000,economy
+VS,Virgin Atlantic,45000,upper_class
+LH,Lufthansa,15000,economy
+LH,Lufthansa,35000,business
+AF,Air France,15000,economy
+AF,Air France,35000,business
+KL,KLM,15000,economy
+IB,Iberia,8000,economy
+EK,Emirates,0,economy
+QR,Qatar Airways,0,economy
+EY,Etihad Airways,0,economy
+SQ,Singapore Airlines,5000,economy
+CX,Cathay Pacific,5000,economy
+JL,Japan Airlines,3000,economy
+NH,All Nippon Airways,3000,economy
+TK,Turkish Airlines,0,economy
+FR,Ryanair,0,economy
+U2,easyJet,0,economy
+W6,Wizz Air,0,economy
