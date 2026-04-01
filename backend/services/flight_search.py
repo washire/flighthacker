@@ -23,6 +23,12 @@ from typing import Any
 # 3 concurrent = safe, quick enough for Phase 1.
 _FLI_SEMAPHORE = asyncio.Semaphore(3)
 
+# In-process memory cache: fallback when Redis is unavailable.
+# Stores serialised result lists keyed by cache key.
+# Lives for the lifetime of the process (cleared on restart).
+# This prevents the same LHR→NRT route being queried 6+ times per search.
+_MEM_CACHE: dict[str, str] = {}
+
 from services.currency import CurrencyConverter
 from config import get_settings
 
@@ -70,7 +76,12 @@ class FlightSearchClient:
         Results are cached in Redis for CACHE_TTL_FLIGHT_SEARCH seconds (6 hrs).
         """
         cache_key = _make_cache_key(origin, destination, travel_date, cabin)
+
+        # Try Redis first, then fall back to in-process memory cache
         cached = await self._redis.get(cache_key)
+        if cached is None:
+            cached = _MEM_CACHE.get(cache_key)
+
         if cached:
             raw_list = json.loads(cached)
             return [RawFlightResult(**r) for r in raw_list]
@@ -90,11 +101,17 @@ class FlightSearchClient:
                 if isinstance(item[k], datetime):
                     item[k] = item[k].isoformat()
 
+        serialised = json.dumps(cacheable)
+
+        # Write to Redis (or NullRedis if unavailable)
         await self._redis.setex(
             cache_key,
             self._settings.CACHE_TTL_FLIGHT_SEARCH,
-            json.dumps(cacheable),
+            serialised,
         )
+        # Always write to in-process cache — survives Redis being down
+        _MEM_CACHE[cache_key] = serialised
+
         return results
 
     async def _fetch_live(
