@@ -51,25 +51,36 @@ logger = logging.getLogger(__name__)
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
     Yields a SQLAlchemy async database session for a single request.
-
-    Why a generator: ensures the session is always closed after the request
-    completes, even if an exception is raised. SQLAlchemy sessions hold
-    a database connection — leaking them exhausts the connection pool.
-
-    Usage:
-        db: AsyncSession = Depends(get_db)
+    Degrades gracefully when the database is unavailable (e.g. on Railway
+    without a PostgreSQL service) — the session is yielded but commit/rollback
+    failures are swallowed so the request still completes.
     """
-    async with AsyncSessionLocal() as session:
-        try:
-            yield session
-            await session.commit()
-        except Exception:
-            # Roll back any partial writes if the request handler raised.
-            # This prevents corrupt partial data from being saved.
-            await session.rollback()
-            raise
-        finally:
-            await session.close()
+    try:
+        async with AsyncSessionLocal() as session:
+            try:
+                yield session
+                try:
+                    await session.commit()
+                except Exception as exc:
+                    logger.warning("db.commit_failed (no DB?) err=%s", exc)
+                    try:
+                        await session.rollback()
+                    except Exception:
+                        pass
+            except Exception:
+                try:
+                    await session.rollback()
+                except Exception:
+                    pass
+                raise
+            finally:
+                try:
+                    await session.close()
+                except Exception:
+                    pass
+    except Exception as exc:
+        logger.warning("db.session_failed err=%s — yielding None", exc)
+        yield None  # type: ignore[misc]
 
 
 # ---------------------------------------------------------------------------
