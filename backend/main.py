@@ -127,8 +127,11 @@ async def on_startup() -> None:
             "This MUST be disabled in production."
         )
 
-    await init_db()
-    logger.info("Database connection pool initialised")
+    try:
+        await init_db()
+        logger.info("Database connection pool initialised")
+    except Exception as exc:
+        logger.error("Database init failed (will retry on first request): %s", exc)
 
 
 @app.on_event("shutdown")
