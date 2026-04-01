@@ -97,22 +97,25 @@ async def get_redis(
     Yields an async Redis connection, or a no-op NullRedis if unavailable.
     The app degrades gracefully — searches still work, just without caching.
     """
-    client = aioredis.from_url(
-        settings.REDIS_URL,
-        encoding="utf-8",
-        decode_responses=True,
-        socket_connect_timeout=2,
-    )
+    client = None
     try:
+        client = aioredis.from_url(
+            settings.REDIS_URL,
+            encoding="utf-8",
+            decode_responses=True,
+            socket_connect_timeout=2,
+        )
         await client.ping()
-        try:
-            yield client
-        finally:
-            await client.aclose()
-    except Exception:
-        logger.warning("Redis unavailable — running without cache")
-        await client.aclose()
+        yield client
+    except Exception as exc:
+        logger.warning("Redis unavailable (%s) — running without cache", exc)
         yield _NullRedis()
+    finally:
+        if client is not None:
+            try:
+                await client.aclose()
+            except Exception:
+                pass
 
 
 # ---------------------------------------------------------------------------
