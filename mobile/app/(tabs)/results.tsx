@@ -28,8 +28,16 @@ const METHOD_LABELS: Record<string, string> = {
   positioning_flight: "Positioning",
   apd_avoidance: "APD Avoidance",
   avios_reward: "Avios",
+  avios_part_pay: "Avios Part-Pay",
   oneworld_portal: "OW Portal",
+  fuel_surcharge_arbitrage: "Surcharge Hack",
+  stopover_program: "Free Stopover",
+  error_fare: "Error Fare",
+  split_ticket: "Split Ticket",
+  date_optimisation: "Date Hack",
+  positioning_plus_main: "Positioning+",
   crazy_mode: "CRAZY",
+  layover_explore: "Layover",
 };
 
 function ResultCard({
