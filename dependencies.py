@@ -76,28 +76,43 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 # Redis connection
 # ---------------------------------------------------------------------------
 
+class _NullRedis:
+    """
+    No-op Redis substitute used when Redis is unavailable.
+    All cache reads return None (cache miss), all writes are silently dropped.
+    The app works correctly — just without caching (slower, no polling).
+    """
+    async def get(self, key): return None
+    async def set(self, key, value, *a, **kw): pass
+    async def setex(self, key, ttl, value): pass
+    async def delete(self, *keys): pass
+    async def ping(self): return True
+    async def aclose(self): pass
+
+
 async def get_redis(
     settings: Settings = Depends(get_settings),
-) -> aioredis.Redis:
+):
     """
-    Yields an async Redis connection.
-
-    Why this exists: Redis is used for caching flight search results, currency
-    rates, and ground transport lookups. All cache reads/writes go through
-    services that receive this dependency — nothing connects to Redis directly.
-
-    Usage:
-        redis: aioredis.Redis = Depends(get_redis)
+    Yields an async Redis connection, or a no-op NullRedis if unavailable.
+    The app degrades gracefully — searches still work, just without caching.
     """
     client = aioredis.from_url(
         settings.REDIS_URL,
         encoding="utf-8",
         decode_responses=True,
+        socket_connect_timeout=2,
     )
     try:
-        yield client
-    finally:
+        await client.ping()
+        try:
+            yield client
+        finally:
+            await client.aclose()
+    except Exception:
+        logger.warning("Redis unavailable — running without cache")
         await client.aclose()
+        yield _NullRedis()
 
 
 # ---------------------------------------------------------------------------
