@@ -18,6 +18,11 @@ from datetime import date, datetime, timezone
 from functools import partial
 from typing import Any
 
+# Limit concurrent Google Flights requests to avoid rate-limiting.
+# Google blocks bursts of 10+ simultaneous requests from one IP.
+# 3 concurrent = safe, quick enough for Phase 1.
+_FLI_SEMAPHORE = asyncio.Semaphore(3)
+
 from services.currency import CurrencyConverter
 from config import get_settings
 
@@ -107,14 +112,15 @@ class FlightSearchClient:
         """
         loop = asyncio.get_running_loop()
         try:
-            raw = await loop.run_in_executor(
-                None,
-                partial(
-                    _fli_search_sync,
-                    origin, destination, travel_date,
-                    cabin, passengers, return_date,
-                ),
-            )
+            async with _FLI_SEMAPHORE:
+                raw = await loop.run_in_executor(
+                    None,
+                    partial(
+                        _fli_search_sync,
+                        origin, destination, travel_date,
+                        cabin, passengers, return_date,
+                    ),
+                )
         except Exception as exc:
             logger.error(
                 "flight_search.fli_error origin=%s dest=%s date=%s err=%s",

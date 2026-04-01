@@ -12,7 +12,7 @@ from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import Settings, get_settings
-from db.session import AsyncSessionLocal
+import db.session as _db_session  # import module, not value — so we see init_db() updates
 
 logger = logging.getLogger(__name__)
 
@@ -40,8 +40,14 @@ async def get_db() -> AsyncGenerator[AsyncSession | None, None]:
     Yields a SQLAlchemy async database session, or None if DB is unreachable.
     Routes must handle None gracefully (search works without DB persistence).
     """
+    session_factory = _db_session.AsyncSessionLocal
+    if session_factory is None:
+        logger.warning("db.not_initialised — yielding None")
+        yield None
+        return
+
     try:
-        async with AsyncSessionLocal() as session:
+        async with session_factory() as session:
             try:
                 yield session
                 try:
