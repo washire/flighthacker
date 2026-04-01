@@ -74,9 +74,7 @@ class FlightSearchClient:
             origin, destination, travel_date, cabin, passengers, return_date
         )
 
-        # Cache serialisable dicts
-        cacheable = [r.__dict__ if hasattr(r, "__dict__") else vars(r) for r in results]
-        # __slots__ objects need different serialisation
+        # RawFlightResult uses __slots__ so we serialise via slot names directly
         cacheable = [
             {s: getattr(r, s) for s in RawFlightResult.__slots__}
             for r in results
