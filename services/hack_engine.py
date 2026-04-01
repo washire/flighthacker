@@ -179,29 +179,53 @@ class HackEngine:
     # ------------------------------------------------------------------
 
     async def _method_direct(self, req: SearchRequest) -> list[ItineraryResult]:
-        """Method 1: Plain direct/cheapest cash flight."""
-        raw_list = await self._flight.search(
-            req.origin, req.destination, req.outbound_date,
-            cabin=req.cabin_class.value, passengers=req.passengers,
-        )
+        """Method 1: Cheapest cash flight across all origin×destination combos."""
+        origins = req.all_origins
+        dests = req.all_destinations
+        city_mode = len(origins) > 1 or len(dests) > 1
+
+        # Search all combinations concurrently
+        combos = [(o, d) for o in origins for d in dests]
+        searches = await asyncio.gather(*[
+            self._flight.search(
+                o, d, req.outbound_date,
+                cabin=req.cabin_class.value, passengers=req.passengers,
+            )
+            for o, d in combos
+        ], return_exceptions=True)
+
         results = []
-        for raw in raw_list[:3]:
-            leg = self._raw_to_leg(raw, req.cabin_class)
-            cost = self._calc.calculate(CostInputs(
-                base_fare_gbp_pence=raw.price_gbp_pence,
-                taxes_gbp_pence=0,
-                carrier_surcharge_pence=0,
-            ))
-            results.append(self._make_result(
-                method=HackMethod.DIRECT_CHEAPEST,
-                outbound=[leg],
-                cost=cost,
-                duration=raw.duration_minutes,
-                data_freshness=datetime.now(timezone.utc),
-                deep_link=raw.deep_link,
-                headline=f"Direct cheapest — {req.origin}→{req.destination}",
-                detail="Cheapest direct or one-stop cash fare on this route.",
-            ))
+        for (orig, dest), raw_list in zip(combos, searches):
+            if isinstance(raw_list, Exception) or not raw_list:
+                continue
+            for raw in raw_list[:2]:
+                leg = self._raw_to_leg(raw, req.cabin_class)
+                cost = self._calc.calculate(CostInputs(
+                    base_fare_gbp_pence=raw.price_gbp_pence,
+                    taxes_gbp_pence=0,
+                    carrier_surcharge_pence=0,
+                ))
+                origin_label = req.origin_city or orig
+                dest_label = req.destination_city or dest
+                if city_mode and (orig != req.origin or dest != req.destination):
+                    headline = f"Cheapest combo: {orig}→{dest} ({origin_label}→{dest_label})"
+                    detail = (
+                        f"Searched all airport combinations for {origin_label}→{dest_label}. "
+                        f"{orig} departure → {dest} arrival is the cheapest pair."
+                    )
+                else:
+                    headline = f"Direct cheapest — {orig}→{dest}"
+                    detail = "Cheapest direct or one-stop cash fare on this route."
+                results.append(self._make_result(
+                    method=HackMethod.DIRECT_CHEAPEST,
+                    outbound=[leg],
+                    cost=cost,
+                    duration=raw.duration_minutes,
+                    data_freshness=datetime.now(timezone.utc),
+                    deep_link=raw.deep_link,
+                    headline=headline,
+                    detail=detail,
+                ))
         return results
 
     async def _method_secondary_airports(self, req: SearchRequest) -> list[ItineraryResult]:

@@ -162,12 +162,25 @@ class ItineraryResult(BaseModel):
 
 
 class SearchRequest(BaseModel):
+    # Primary airport codes (required; used as display label and fallback)
     origin: str = Field(..., min_length=3, max_length=3)
     destination: str = Field(..., min_length=3, max_length=3)
     outbound_date: date
     return_date: date | None = None
     passengers: int = Field(1, ge=1, le=9)
     cabin_class: CabinClass = CabinClass.ECONOMY
+
+    # City-mode: if set, the engine searches ALL combinations of these airports.
+    # e.g. origin_airports=["LHR","LGW","STN","LTN","LCY"]
+    #       destination_airports=["NRT","HND"]
+    # surfaces the cheapest pair across all 10 combos.
+    origin_airports: list[str] | None = None
+    destination_airports: list[str] | None = None
+
+    # Display labels for city-mode (e.g. "London", "Tokyo")
+    origin_city: str | None = None
+    destination_city: str | None = None
+
     # Optional Avios context
     avios_balance: int | None = Field(None, ge=0)
     pence_per_point: float | None = Field(None, gt=0)
@@ -180,12 +193,29 @@ class SearchRequest(BaseModel):
     def uppercase_iata(cls, v: str) -> str:
         return v.upper().strip()
 
+    @field_validator("origin_airports", "destination_airports", mode="before")
+    @classmethod
+    def uppercase_iata_list(cls, v):
+        if v is None:
+            return v
+        return [x.upper().strip() for x in v]
+
     @field_validator("return_date", mode="after")
     @classmethod
     def return_after_outbound(cls, v: date | None, info) -> date | None:
         if v and info.data.get("outbound_date") and v < info.data["outbound_date"]:
             raise ValueError("return_date must be on or after outbound_date")
         return v
+
+    @property
+    def all_origins(self) -> list[str]:
+        """All origin airports to search (city-mode or single)."""
+        return self.origin_airports or [self.origin]
+
+    @property
+    def all_destinations(self) -> list[str]:
+        """All destination airports to search (city-mode or single)."""
+        return self.destination_airports or [self.destination]
 
 
 class SearchPhase(str, Enum):
